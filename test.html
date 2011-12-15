@@ -1,0 +1,198 @@
+<html>
+
+<head>
+	<script src="jquery1.6-min.js" type="text/javascript" charset="utf-8"></script>
+	<style type="text/css" media="screen">
+	.s {
+		position: absolute;
+		font-family: arial;
+		width: 30px;
+		height: 30px;
+		background: yellow;
+		text-align: center;
+	}
+	</style>
+</head>
+<canvas id="foo" height="100" width="100"></canvas>
+<img id="logo" src="pusher_logo_150.png" style="display: none">
+
+<script type="text/javascript" charset="utf-8">
+  var canvas = document.getElementById('foo');
+  canvas.width = window.innerWidth
+  canvas.height = window.innerHeight
+  var ctx = canvas.getContext('2d');
+  var img = document.getElementById('logo');
+  var RAD = Math.PI/180.0;
+  
+  var colors = [
+    'rgb(255, 0, 0)',
+    'rgb(128, 128, 0)',
+    'rgb(0, 255, 0)',
+    'rgb(0, 128, 255)',
+    'rgb(0, 0, 255)',
+    'rgb(128, 0, 128)'
+  ]
+	
+	var msg = [
+	'h', 'e', 'l', 'l', 'o', 'o'
+	]
+  
+  
+
+  var Vector = function(x, y){
+    this.x = x;
+    this.y = y;
+    var self = this;
+    
+    this.add = function(vector){
+      self.x += vector.x
+      self.y += vector.y
+    }
+		
+    this.subtract = function(vector){
+      self.x = vector.x
+      self.y += vector.y
+    }
+		
+  }
+  
+  Vector.prototype ={
+    theta: function()
+    {
+       return Math.atan2(this.y, this.x);
+    },
+  
+    thetaTo: function(vec)
+    {
+       // calc angle between the two vectors
+       var v = this.clone().norm();
+       var w = vec.clone().norm();
+       return Math.acos(v.dot(w));
+    },
+  
+    thetaTo2: function(vec)
+    {
+       return Math.atan2(vec.y, vec.x) - Math.atan2(this.y, this.x);
+    },
+		
+    norm: function()
+    {
+       var len = this.length();
+       this.x /= len;
+       this.y /= len;
+       return this;
+    },
+      
+    clone: function()
+    {
+       return new Vector(this.x, this.y);
+    },
+		
+    length: function()
+    {
+       return Math.sqrt(this.x * this.x + this.y * this.y); 
+    },
+		
+    dot: function(v)
+    {
+       return this.x * v.x + this.y * v.y;
+    },
+			
+  }
+  
+  var addRandomSprite = function(){
+    var xSpeed = 20 - (Math.random() * 40)
+    var ySpeed = -40 + (Math.random() * -20)
+    var sprite = {
+      position: new Vector(Math.random()*canvas.width, canvas.height),
+      vector: new Vector(xSpeed, ySpeed),
+      rot: Math.random() * 180,
+      rotSpeed: xSpeed,
+      oldPositions: [],
+      update: function(){
+        
+          this.vector.add(gravity);
+          this.oldPositions.push(this.position.clone())
+          this.position.add(this.vector);
+          this.rot += this.rotSpeed
+        
+      }
+    }
+    sprites.push(sprite)
+  }
+  
+  var sprites = [];
+
+  var gravity = new Vector(0, 2)
+  
+  var redraw = function(sprite){
+    // drawSprite(sprite)
+		drawTail(sprite)
+  };
+	
+	var drawSprite = function(sprite){
+    ctx.save()
+		ctx.translate(sprite.position.x, sprite.position.y);
+		ctx.rotate((sprite.rot) * RAD)
+    ctx.drawImage(img, 0, 0, 30, 30)
+		ctx.restore()
+	}
+	
+	var drawTail = function(sprite) {
+    var w = 20;
+		for (var i=0; i < colors.length; i++) {
+			
+			
+		  var index = sprite.oldPositions.length - i
+			var ov = sprite.oldPositions[index - 1]
+			var nv = sprite.oldPositions[index]
+			
+		  if (nv && ov){			
+			
+				var foo = new Vector(nv.x - ov.x, nv.y - ov.y)
+				var angle = foo.theta();
+				
+				var e = $('<div class="s">'+msg[i]+'</div>')
+				e.css({
+					top: nv.y + 'px',
+					left: nv.x + 'px'
+					
+				})
+				$('body').append(e)
+				e.css({'-webkit-transform': 'rotate('+(angle / RAD) + 180 +'deg)'})
+
+		    ctx.save()
+    		ctx.translate(nv.x, nv.y);
+				// var angle = ov.thetaTo(nv)
+    		ctx.rotate( angle )
+		    ctx.fillStyle = colors[i]
+		    ctx.fillRect(0, 0, 2, w)
+    		ctx.restore()
+	    }
+			
+			
+		};
+	}
+  
+	addRandomSprite();
+	
+  setInterval(function(){
+    ctx.fillStyle = 'rgba(255, 255, 255, 1)'
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'rgb(255, 0, 0)'
+				$('.s').remove();
+    if ((Math.random() * 50 )> 48)
+			addRandomSprite();
+      
+    for (var i=0; i < sprites.length; i++) {
+      var sprite = sprites[i]
+      if (sprite && sprite.position.y < canvas.height + 20){
+        sprite.update()
+        redraw(sprite)
+      } else {
+        sprites[i] = null
+      }
+    };
+  }, 100);
+</script>
+</html>
