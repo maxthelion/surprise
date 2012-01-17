@@ -56,9 +56,12 @@
   var img = document.getElementById('cannon');
   var RAD = Math.PI/180.0;
   var sprites = [];
-  var gravity = new Vector(0, 0.5)
+  var gravity = new Vector(0, 4)
+  var timestep_length = 50;
+  var g = Math.pow(timestep_length, -2)*gravity.y;
+  console.log("g: ", g)
   var frameNum = 0;
-  
+
   var stage
   var cannons = []
   var cords = []
@@ -75,10 +78,12 @@
       })
       return false;
     })
-    var leftCannon = new Cannon(new Vector(70, stage.height - 70), 45)
+    var leftCannon = new Cannon(new Vector(70, stage.height - 70), new Vector(stage.width, 150), 1000)
+    console.log("leftCannon: ", leftCannon.vect);
     sprites.push( leftCannon );
     cannons.push( leftCannon );
-    var rightCannon = new Cannon(new Vector(stage.width - 70, stage.height - 70), -45)
+    var rightCannon = new Cannon(new Vector(stage.width - 70, stage.height - 70), new Vector(0, 150), 1000)
+    console.log("rightCannon: ", rightCannon.vect);
     sprites.push( rightCannon );
     cannons.push( rightCannon );
     
@@ -139,16 +144,26 @@
     }
   }
   
-  var Cannon = function(p, a){
+
+  var Cannon = function(p, target, time) {
     this.position = p;
-    this.angle = a;
+    this.setTarget(target, time);
   }
   Cannon.prototype = {
+    setTarget: function(target, time) {
+      this.target = target;
+      this.vect = new Vector((target.x - this.position.x)/time, (target.y - this.position.y - Math.pow(time, 2)*g/2)/time);
+      this.angle = this.vect.theta() + 90*RAD;
+      this.speed = this.vect.len() * timestep_length;
+      console.log('setting angle to: ', this.angle);
+    },
     width: 100,
     height: 100,
     update: function(){},
     fire: function(){
-      var monkey = new Monkey(this.position.clone(), new Vector(0, -40).rotate(this.angle))
+      console.log("firing: ", this.angle, this.speed);
+      var r = new Vector((Math.random() - 0.5)*10, (Math.random() - 0.5)*10);
+      var monkey = new Monkey(this.position.clone(), new Vector(0, -this.speed).rotate(this.angle).add(r))
       sprites.push(monkey)
       monkeys.push(monkey)
       sprites.push(new Explosion(this.position.clone()))
@@ -171,7 +186,8 @@
   Monkey.prototype = {
     update: function(){
       if (!this.attached){
-        this.angle = this.vector.theta() - (90 /RAD)
+        this.angle = this.vector.theta() + (90*RAD)
+
         this.vector.add(gravity)
         this.position.add(this.vector)
         this.currentPosition = this.position
@@ -255,7 +271,7 @@
         // sprites[i] = null
       }
     };
-  }, 50);
+  }, timestep_length);
 
 </script>
 </html>
