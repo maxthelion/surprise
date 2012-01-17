@@ -206,7 +206,11 @@
       ctx.rotate(this.angle);
       var width = 100
       var height = 100
-      ctx.drawImage(this.avatar, (frameNum % 4) * width, 0, width, height, -(width/2), -(height/2), width, height)
+      if (this.attached)
+        var sliceIndex = 4
+      else
+        var sliceIndex = (frameNum % 4)
+      ctx.drawImage(this.avatar, sliceIndex * width, 0, width, height, -(width/2), -(height/2), width, height)
       ctx.restore()
     },
     attach: function(cord){
