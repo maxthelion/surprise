@@ -270,7 +270,7 @@
       cords.forEach(function(cord){
         if (
           Math.abs(cord.position.x - monkey.position.x) < 40 &&
-          monkey.position.y < 200
+          monkey.position.y >= cord.position.y && monkey.position.y <= cord.position.y + cord.height
         ){
           monkey.attach(cord);
           banner.startFall()
