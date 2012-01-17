@@ -21,9 +21,19 @@
 	  bottom: 10px;
 	  left: 50%;
 	}
+	#banner {
+	  position: absolute;
+	  width: 70%;
+	  height: 200px;
+	  background: cyan;
+	  font-size: 4em;
+	  text-align: center;
+	  left: 15%;
+	}
 	</style>
 	<title>Welcome, my friend!</title>
 </head>
+<html>
 <canvas id="foo" height="100" width="100"></canvas>
 
 <a href="#" id="fuse">Fire!</a>
@@ -33,6 +43,10 @@
 <img id="monkey" src="images/monkey.png" style="display: none">
 <img id="explosion" src="images/explosion.png" style="display: none">
 
+<div id="banner">  
+  Hello
+</div>
+</html>
 
 <script type="text/javascript" charset="utf-8">
   var canvas = document.getElementById('foo');
@@ -49,6 +63,7 @@
   var cannons = []
   var cords = []
   var monkeys = []
+  var banner = null
   $().ready(function(){
     stage = {
       height: window.innerHeight,
@@ -170,6 +185,25 @@
     }
   }
   
+  
+  var Banner = function(p){
+    this.el = $('#banner')
+    this.position = new Vector(0, -$('#banner').height())
+    this.vector = new Vector(0, 0)
+  }
+  Banner.prototype = {
+    update: function(){
+      if( this.position.y < 50){
+        this.vector.add(gravity)
+        this.position.add(this.vector)
+      }
+    },
+    
+    draw: function(){
+      this.el.css( 'top', this.position.y +'px')
+    }
+  };
+  
   var redraw = function(sprite){
     sprite.draw(ctx)
   };
@@ -193,6 +227,10 @@
 		      monkey.position.y < 200
 		    ){
 		      monkey.attach();
+		      if (!banner){
+		        banner = new Banner()
+		        sprites.push( banner )
+	        }
 		    }
 		  })
 		});
