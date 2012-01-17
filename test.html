@@ -1,35 +1,35 @@
 <html>
 
 <head>
-	<script src="jquery1.6-min.js" type="text/javascript"></script>
-	<script src="util.js" type="text/javascript"></script>
-	<style type="text/css" media="screen">
-	* {
-	  margin: 0;
-	  padding:0;
-	}
-	.s {
-		position: absolute;
-		font-family: arial;
-		width: 30px;
-		height: 30px;
-		text-align: center;
-		font-size: 2em;
-	}
-	#fuse {
-	  position: absolute;
-	  bottom: 10px;
-	  left: 50%;
-	}
-	#banner {
-	  position: absolute;
-	  height: 200px;
-	  background: cyan;
-	  font-size: 4em;
-	  text-align: center;
-	}
-	</style>
-	<title>Welcome, my friend!</title>
+  <script src="jquery1.6-min.js" type="text/javascript"></script>
+  <script src="util.js" type="text/javascript"></script>
+  <style type="text/css" media="screen">
+  * {
+    margin: 0;
+    padding:0;
+  }
+  .s {
+    position: absolute;
+    font-family: arial;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    font-size: 2em;
+  }
+  #fuse {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+  }
+  #banner {
+    position: absolute;
+    height: 200px;
+    background: cyan;
+    font-size: 4em;
+    text-align: center;
+  }
+  </style>
+  <title>Welcome, my friend!</title>
 </head>
 <html>
 <canvas id="foo" height="100" width="100"></canvas>
@@ -136,10 +136,10 @@
     avatar: document.getElementById('explosion'),
     draw: function(ctx){
       ctx.save()
-  		ctx.translate(this.position.x, this.position.y);
-  		ctx.rotate(this.angle);
+      ctx.translate(this.position.x, this.position.y);
+      ctx.rotate(this.angle);
       ctx.drawImage(this.avatar, -(this.width /2), -(this.height /2), this.width, this.height)
-  		ctx.restore()
+      ctx.restore()
     }
   }
   
@@ -253,23 +253,23 @@
   
   var interval = setInterval(function(){
     frameNum++
-		clearStage()
-		for (var i=0; i < sprites.length; i++) {
-	    if(sprites[i].deleted)
-	      sprites.splice(i, 1)
-	  }
-	  
-		monkeys.forEach(function(monkey){
-		  cords.forEach(function(cord){
-		    if (
-		      Math.abs(cord.position.x - monkey.position.x) < 20 &&
-		      monkey.position.y < 200
-		    ){
-		      monkey.attach(cord);
-		      banner.startFall()
-		    }
-		  })
-		});
+    clearStage()
+    for (var i=0; i < sprites.length; i++) {
+      if(sprites[i].deleted)
+        sprites.splice(i, 1)
+    }
+    
+    monkeys.forEach(function(monkey){
+      cords.forEach(function(cord){
+        if (
+          Math.abs(cord.position.x - monkey.position.x) < 20 &&
+          monkey.position.y < 200
+        ){
+          monkey.attach(cord);
+          banner.startFall()
+        }
+      })
+    });
     for (var i=0; i < sprites.length; i++) {
       var sprite = sprites[i]
       if (sprite && sprite.position.y < canvas.height + 20){
