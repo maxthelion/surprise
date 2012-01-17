@@ -110,6 +110,10 @@
       var tmpPosition = this.basePosition.clone()
       tmpPosition.add(this.relPosition)
       this.position = tmpPosition
+      if (this.phase == 2) {
+        this.segment1angle += 0.1;
+        this.segment2angle += 0.2;
+      }
     },
     avatar: document.getElementById('cannon'),
     draw: function(ctx){
@@ -224,21 +228,23 @@
       ctx.drawImage(this.avatar, sliceIndex * width, 0, width, height, -(width/2), -(height/2), width, height)
       ctx.restore()
     },
-    attach: function(cord){
-      this.attached = true
-      this.cord = cord
-      this.cord.phase = 2;
-      this.relPosition = this.position.clone()
-      this.relPosition.subtract(cord.position)
-      this.relPosition.x = -7;
-      this.cord.segment1length = this.relPosition.y;
-      this.cord.segment1angle = 0;
-      this.cord.segment2length = this.cord.height - this.cord.segment1length;
-      this.cord.segment2angle = 0;
+    attach: function(cord) {
+      if (!this.attached) {
+        this.attached = true
+        this.cord = cord
+        this.cord.phase = 2;
+        this.relPosition = this.position.clone()
+        this.relPosition.subtract(cord.position)
+        this.relPosition.x = -7;
+        this.cord.segment1length = this.relPosition.y;
+        this.cord.segment1angle = 0;
+        this.cord.segment2length = this.cord.height - this.cord.segment1length;
+        this.cord.segment2angle = 0;
 
-      this.vector.y = 0;
+        this.vector.y = 0;
 
-      // split into 2
+        // split into 2
+      }
     }
   }
   
