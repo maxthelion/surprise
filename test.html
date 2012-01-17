@@ -1,8 +1,13 @@
 <html>
 
 <head>
-	<script src="jquery1.6-min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="jquery1.6-min.js" type="text/javascript"></script>
+	<script src="util.js" type="text/javascript"></script>
 	<style type="text/css" media="screen">
+	* {
+	  margin: 0;
+	  padding:0;
+	}
 	.s {
 		position: absolute;
 		font-family: arial;
@@ -11,173 +16,153 @@
 		text-align: center;
 		font-size: 2em;
 	}
+	#fuse {
+	  position: absolute;
+	  bottom: 10px;
+	  left: 50%;
+	}
 	</style>
+	<title>Welcome, my friend!</title>
 </head>
 <canvas id="foo" height="100" width="100"></canvas>
+
+<a href="#" id="fuse">Fire!</a>
+
 <img id="logo" src="pusher_logo_150.png" style="display: none">
+<img id="cannon" src="images/cannon.png" style="display: none">
+<img id="monkey" src="images/monkey.png" style="display: none">
+
 
 <script type="text/javascript" charset="utf-8">
   var canvas = document.getElementById('foo');
   canvas.width = window.innerWidth
   canvas.height = window.innerHeight
   var ctx = canvas.getContext('2d');
-  var img = document.getElementById('logo');
+  var img = document.getElementById('cannon');
   var RAD = Math.PI/180.0;
-  
-  var colors = [
-    'rgb(255, 0, 0)',
-    'rgb(128, 128, 0)',
-    'rgb(0, 255, 0)',
-    'rgb(0, 128, 255)',
-    'rgb(0, 0, 255)',
-    'rgb(128, 0, 128)'
-  ]
-	
-	var msg = [
-		'h', 'e', 'l', 'l', 'o', 'o'
-	]
-  
-  var Point = function(vector, rotation) {
-		this.x = vector.x
-		this.y = vector.y
-		this.rotation = rotation
-		this.vector = vector
-	}
-
-  var Vector = function(x, y){
-    this.x = x;
-    this.y = y;
-  }
-  
-  Vector.prototype = {
-		
-    add:  function(vector){
-      this.x += vector.x
-      this.y += vector.y
-    },
-		
-    subtract: function(vector){
-      this.x = vector.x
-      this.y += vector.y
-    },
-		
-    theta: function(){
-       return Math.atan2(this.y, this.x);
-    },
-      
-    clone: function(){
-       return new Vector(this.x, this.y);
-    },
-
-    rotate: function(a){
-    	var ca = Math.cos(a);
-    	var sa = Math.sin(a);
-    	with (this)
-    	{
-    		var rx = x*ca - y*sa;
-    		var ry = x*sa + y*ca;
-    		x = rx;
-    		y = ry;
-    	}
-    	return this;
-    }
-  }
-  var tailLength = 20
-  var addRandomSprite = function(){
-    var ySpeed = (-40 + (Math.random() * -20)) / 2
-		var xPos = (Math.random()*(canvas.width /2)) + (canvas.width /2)
-		var xSpeed = -20
-    var sprite = {
-      position: new Vector(xPos, canvas.height),
-      vector: new Vector(xSpeed, ySpeed),
-      oldPositions: [],
-      update: function(){
-				var point =  new Point(this.position.clone(), this.vector.theta())
-				this.oldPositions.push(point)
-				
-				if (this.oldPositions.length > tailLength)
-					this.oldPositions.shift()
-					
-				this.vector.add(gravity);
-        this.position.add(this.vector);
-      }
-    }
-    sprites.push(sprite)
-  }
-  
   var sprites = [];
-  var gravity = new Vector(0, 1)
+  var gravity = new Vector(0, 0.5)
+  var frameNum = 0;
+  
+  var stage
+  var cannons = []
+  var cords = []
+  var monkeys = []
+  $().ready(function(){
+    stage = {
+      height: window.innerHeight,
+      width: window.innerWidth
+    }
+    $('#fuse').click(function(){
+      cannons.forEach(function(c){
+        c.fire();
+      })
+      return false;
+    })
+    var leftCannon = new Cannon(new Vector(70, stage.height - 70), 45)
+    sprites.push( leftCannon );
+    cannons.push( leftCannon );
+    var rightCannon = new Cannon(new Vector(stage.width - 70, stage.height - 70), -45)
+    sprites.push( rightCannon );
+    cannons.push( rightCannon );
+    
+    var chord = new Cord(new Vector(70, 0)) 
+    sprites.push(chord);
+    cords.push(chord);
+    var chord = new Cord(new Vector(stage.width - 70, 0)) 
+    sprites.push(chord);
+    cords.push(chord);
+  });
+
+  var Cord = function(p){
+    this.position = p
+  }
+  Cord.prototype = {
+    width: 5,
+    height: 200,
+    update: function(){
+      if (this.monkeysAttached){
+        this.vector.add(gravity)
+      }
+    },
+    avatar: document.getElementById('cannon'),
+    draw: function(ctx){
+      ctx.fillRect(this.position.x, this.position.y, this.width, this.height)
+    }
+  }
+  
+  var Cannon = function(p, a){
+    this.position = p;
+    this.angle = a;
+  }
+  Cannon.prototype = {
+    width: 100,
+    height: 100,
+    update: function(){},
+    fire: function(){
+      var monkey = new Monkey(this.position.clone(), new Vector(0, -40).rotate(this.angle))
+      sprites.push(monkey)
+      monkeys.push(monkey)
+    },
+    avatar: document.getElementById('cannon'),
+    draw: function(ctx){
+      ctx.save()
+  		ctx.translate(this.position.x, this.position.y);
+  		ctx.rotate(this.angle);
+      ctx.drawImage(this.avatar, -(this.width /2), -(this.height /2), this.width, this.height)
+  		ctx.restore()
+    }
+  }
+  
+  var Monkey = function(p, v){
+    this.position = p
+    this.vector = v
+  }
+  Monkey.prototype = {
+    update: function(){
+      if (!this.attached){
+        this.angle = this.vector.theta() - (90 /RAD)
+        this.vector.add(gravity)
+        this.position.add(this.vector)
+      }
+    },
+    avatar: document.getElementById('monkey'),
+    draw: function(ctx){
+      ctx.save()
+  		ctx.translate(Math.floor(this.position.x), Math.floor(this.position.y));
+  		ctx.rotate(this.angle);
+  		var width = 100
+  		var height = 100
+      ctx.drawImage(this.avatar, (frameNum % 4) * width, 0, width, height, -(width/2), -(height/2), width, height)
+  		ctx.restore()
+    },
+    attach: function(){
+      this.attached = true
+      this.angle = 90
+    }
+  }
   
   var redraw = function(sprite){
-    // drawSprite(sprite)
-		drawTail(sprite)
+    sprite.draw(ctx)
   };
 	
-	var drawSprite = function(sprite){
-    ctx.save()
-		ctx.translate(sprite.position.x, sprite.position.y);
-    ctx.drawImage(img, 0, 0, 30, 30)
-		ctx.restore()
-	}
-	
-	
-	var addLetter = function(l, nv, angle){
-		var e = $('<div class="s">'+l+'</div>')
-		e.css({
-			top: nv.y + 'px',
-			left: nv.x + 'px'
-		})
-		$('body').append(e)
-		e.css({'-webkit-transform': 'rotate('+((angle / RAD) + 180) +'deg)'})
-	}
-	
-	var drawTail = function(sprite) {
-		
-		for (var i=0; i < msg.length; i++) {
-				var index = Math.round( tailLength / msg.length )  * i
-				var foo = sprite.oldPositions[ sprite.oldPositions.length -index]
-				if (foo != undefined)
-					addLetter(msg[i], foo.vector, foo.rotation)
-		};
-		
-			
-		if (sprite.oldPositions.length > 1){
-			var p = sprite.oldPositions[0];
-			ctx.beginPath();
-			ctx.fillStyle = "rgb(255, 255, 0)"
-	    ctx.strokeStyle = 'rgb(255, 0, 255)'
-			
-			ctx.moveTo(p.x, p.y)
-			for (var i=0; i < sprite.oldPositions.length; i++) {				
-				ctx.lineTo(sprite.oldPositions[i].x, sprite.oldPositions[i].y)
-			};
-			// ctx.stroke();
-			// ctx.beginPath();
-			// ctx.strokeStyle = 'rgb(255, 0, 0)'
-			var reversed = sprite.oldPositions.reverse()
-			for (var i=0; i < reversed.length; i++) {
-				var foo = new Vector(0, 50)
-				foo.rotate(reversed[i].rotation)
-				foo.add(reversed[i].vector)
-				ctx.lineTo(foo.x, foo.y)
-			};
-			sprite.oldPositions.reverse()
-			ctx.stroke()
-			ctx.fill()
-		}
-			
-	}
-	
 	var clearStage = function(){
-    ctx.fillStyle = 'rgba(255, 255, 255, 1)'
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-		$('.s').remove();
+    ctx.clearRect(0, 0, stage.width, stage.height);
 	}
 	
   var interval = setInterval(function(){
+    frameNum++
 		clearStage()
-    if ((Math.random() * 50 )> 48)
-			addRandomSprite();
+		monkeys.forEach(function(monkey){
+		  cords.forEach(function(cord){
+		    if (
+		      Math.abs(cord.position.x - monkey.position.x) < 20 &&
+		      monkey.position.y < 200
+		    ){
+		      monkey.attach();
+		    }
+		  })
+		});
     for (var i=0; i < sprites.length; i++) {
       var sprite = sprites[i]
       if (sprite && sprite.position.y < canvas.height + 20){
@@ -188,9 +173,6 @@
       }
     };
   }, 50);
-	
-		$('body').click(function(){
-			clearInterval(interval)
-		})
+
 </script>
 </html>
