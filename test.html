@@ -54,10 +54,9 @@
   var img = document.getElementById('cannon');
   var RAD = Math.PI/180.0;
   var sprites = [];
-  var gravity = new Vector(0, 4)
+  var gravity = new Vector(0, 2)
   var timestep_length = 50;
   var g = Math.pow(timestep_length, -2)*gravity.y;
-  console.log("g: ", g)
   var frameNum = 0;
 
   var stage
@@ -77,24 +76,24 @@
       })
       return false;
     })
-    var leftCannon = new Cannon(new Vector(70, stage.height - 70), new Vector(stage.width, 150), 1000)
-    console.log("leftCannon: ", leftCannon.vect);
-    sprites.push( leftCannon );
-    cannons.push( leftCannon );
-    var rightCannon = new Cannon(new Vector(stage.width - 70, stage.height - 70), new Vector(0, 150), 1000)
-    console.log("rightCannon: ", rightCannon.vect);
-    sprites.push( rightCannon );
-    cannons.push( rightCannon );
-    
     banner = new Banner()
     sprites.push( banner )
     
-    var chord = new Cord(new Vector(bannerMargin, 200), banner) 
-    sprites.push(chord);
-    cords.push(chord);
-    var chord = new Cord(new Vector(stage.width - bannerMargin, 200), banner) 
-    sprites.push(chord);
-    cords.push(chord);
+    var leftChord = new Cord(new Vector(bannerMargin, 200), banner) 
+    sprites.push(leftChord);
+    cords.push(leftChord);
+    var rightChord = new Cord(new Vector(stage.width - bannerMargin, 200), banner) 
+    sprites.push(rightChord);
+    cords.push(rightChord);
+
+    var leftCannon = new Cannon(new Vector(70, stage.height - 70), rightChord.midpoint(), 1000)
+    console.log("leftCannon: ", leftCannon.vect);
+    sprites.push( leftCannon );
+    cannons.push( leftCannon );
+    var rightCannon = new Cannon(new Vector(stage.width - 70, stage.height - 70), leftChord.midpoint(), 1000)
+    console.log("rightCannon: ", rightCannon.vect);
+    sprites.push( rightCannon );
+    cannons.push( rightCannon );
   });
 
   var Cord = function(p, banner){
@@ -114,9 +113,12 @@
     avatar: document.getElementById('cannon'),
     draw: function(ctx){
       ctx.fillRect(this.position.x, this.position.y, this.width, this.height)
+    },
+    midpoint: function() {
+      return this.position.clone().subtract(new Vector(this.width/2, this.height/2));
     }
   }
-  
+
   var Explosion = function(p){
     this.position = p
     this.width= 100
@@ -161,7 +163,7 @@
     update: function(){},
     fire: function(){
       console.log("firing: ", this.angle, this.speed);
-      var r = new Vector((Math.random() - 0.5)*10, (Math.random() - 0.5)*10);
+      var r = new Vector((Math.random() - 0.5)*5, (Math.random() - 0.5)*5);
       var monkey = new Monkey(this.position.clone(), new Vector(0, -this.speed).rotate(this.angle).add(r))
       sprites.push(monkey)
       monkeys.push(monkey)
@@ -262,7 +264,7 @@
     monkeys.forEach(function(monkey){
       cords.forEach(function(cord){
         if (
-          Math.abs(cord.position.x - monkey.position.x) < 20 &&
+          Math.abs(cord.position.x - monkey.position.x) < 40 &&
           monkey.position.y < 200
         ){
           monkey.attach(cord);
@@ -272,7 +274,7 @@
     });
     for (var i=0; i < sprites.length; i++) {
       var sprite = sprites[i]
-      if (sprite && sprite.position.y < canvas.height + 20){
+      if (sprite && sprite.position.y < canvas.height + 40){
         sprite.update()
         redraw(sprite)
       } else {
