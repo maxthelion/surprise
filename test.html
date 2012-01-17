@@ -23,12 +23,10 @@
 	}
 	#banner {
 	  position: absolute;
-	  width: 70%;
 	  height: 200px;
 	  background: cyan;
 	  font-size: 4em;
 	  text-align: center;
-	  left: 15%;
 	}
 	</style>
 	<title>Welcome, my friend!</title>
@@ -67,6 +65,7 @@
   var cords = []
   var monkeys = []
   var banner = null
+  var bannerMargin = 250
   $().ready(function(){
     stage = {
       height: window.innerHeight,
@@ -90,10 +89,10 @@
     banner = new Banner()
     sprites.push( banner )
     
-    var chord = new Cord(new Vector(70, 200), banner) 
+    var chord = new Cord(new Vector(bannerMargin, 200), banner) 
     sprites.push(chord);
     cords.push(chord);
-    var chord = new Cord(new Vector(stage.width - 70, 200), banner) 
+    var chord = new Cord(new Vector(stage.width - bannerMargin, 200), banner) 
     sprites.push(chord);
     cords.push(chord);
   });
@@ -192,7 +191,10 @@
         this.position.add(this.vector)
         this.currentPosition = this.position
       } else {
-        this.position = this.basePosition + this.currentPosition
+        this.angle = 0
+        var tmp = this.cord.position.clone();
+        tmp.add(this.relPosition)
+        this.position = tmp
       }
     },
     avatar: document.getElementById('monkey'),
@@ -207,7 +209,9 @@
     },
     attach: function(){
       this.attached = true
-      this.angle = 90
+      this.cord = cord
+      this.relPosition = this.position.clone()
+      this.relPosition.subtract(cord.position)
     }
   }
   
@@ -216,6 +220,10 @@
     this.el = $('#banner')
     this.position = new Vector(0, -$('#banner').height())
     this.vector = new Vector(0, 0)
+    this.el.css({
+      left: bannerMargin,
+      width: stage.width - (2* bannerMargin)
+    })
   }
   Banner.prototype = {
     update: function(){
