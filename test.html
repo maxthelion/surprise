@@ -82,24 +82,30 @@
     sprites.push( rightCannon );
     cannons.push( rightCannon );
     
-    var chord = new Cord(new Vector(70, 0)) 
+    banner = new Banner()
+    sprites.push( banner )
+    
+    var chord = new Cord(new Vector(70, 200), banner) 
     sprites.push(chord);
     cords.push(chord);
-    var chord = new Cord(new Vector(stage.width - 70, 0)) 
+    var chord = new Cord(new Vector(stage.width - 70, 200), banner) 
     sprites.push(chord);
     cords.push(chord);
   });
 
-  var Cord = function(p){
-    this.position = p
+  var Cord = function(p, banner){
+    this.relPosition = p
+    this.position = this.relPosition
+    this.vector = new Vector(0, 0)
+    this.basePosition = banner.position
   }
   Cord.prototype = {
     width: 5,
     height: 200,
     update: function(){
-      if (this.monkeysAttached){
-        this.vector.add(gravity)
-      }
+      var tmpPosition = this.basePosition.clone()
+      tmpPosition.add(this.relPosition)
+      this.position = tmpPosition
     },
     avatar: document.getElementById('cannon'),
     draw: function(ctx){
@@ -158,6 +164,7 @@
   }
   
   var Monkey = function(p, v){
+    this.basePosition = new Vector(0, 0)
     this.position = p
     this.vector = v
   }
@@ -167,6 +174,9 @@
         this.angle = this.vector.theta() - (90 /RAD)
         this.vector.add(gravity)
         this.position.add(this.vector)
+        this.currentPosition = this.position
+      } else {
+        this.position = this.basePosition + this.currentPosition
       }
     },
     avatar: document.getElementById('monkey'),
@@ -193,7 +203,7 @@
   }
   Banner.prototype = {
     update: function(){
-      if( this.position.y < 50){
+      if( this.falling && this.position.y < 50){
         this.vector.add(gravity)
         this.position.add(this.vector)
       }
@@ -201,6 +211,11 @@
     
     draw: function(){
       this.el.css( 'top', this.position.y +'px')
+    },
+    
+    startFall: function(){
+      if (!this.falling)
+        this.falling = true
     }
   };
   
@@ -226,11 +241,8 @@
 		      Math.abs(cord.position.x - monkey.position.x) < 20 &&
 		      monkey.position.y < 200
 		    ){
-		      monkey.attach();
-		      if (!banner){
-		        banner = new Banner()
-		        sprites.push( banner )
-	        }
+		      monkey.attach(cord);
+		      banner.startFall()
 		    }
 		  })
 		});
