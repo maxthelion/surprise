@@ -156,10 +156,10 @@
     avatar: document.getElementById('cannon'),
     draw: function(ctx){
       ctx.save()
-  		ctx.translate(this.position.x, this.position.y);
-  		ctx.rotate(this.angle);
+      ctx.translate(this.position.x, this.position.y);
+      ctx.rotate(this.angle);
       ctx.drawImage(this.avatar, -(this.width /2), -(this.height /2), this.width, this.height)
-  		ctx.restore()
+      ctx.restore()
     }
   }
   
@@ -182,12 +182,12 @@
     avatar: document.getElementById('monkey'),
     draw: function(ctx){
       ctx.save()
-  		ctx.translate(Math.floor(this.position.x), Math.floor(this.position.y));
-  		ctx.rotate(this.angle);
-  		var width = 100
-  		var height = 100
+      ctx.translate(Math.floor(this.position.x), Math.floor(this.position.y));
+      ctx.rotate(this.angle);
+      var width = 100
+      var height = 100
       ctx.drawImage(this.avatar, (frameNum % 4) * width, 0, width, height, -(width/2), -(height/2), width, height)
-  		ctx.restore()
+      ctx.restore()
     },
     attach: function(){
       this.attached = true
@@ -222,11 +222,11 @@
   var redraw = function(sprite){
     sprite.draw(ctx)
   };
-	
-	var clearStage = function(){
+  
+  var clearStage = function(){
     ctx.clearRect(0, 0, stage.width, stage.height);
-	}
-	
+  }
+  
   var interval = setInterval(function(){
     frameNum++
 		clearStage()
