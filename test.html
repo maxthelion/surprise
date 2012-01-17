@@ -207,7 +207,7 @@
       ctx.drawImage(this.avatar, (frameNum % 4) * width, 0, width, height, -(width/2), -(height/2), width, height)
       ctx.restore()
     },
-    attach: function(){
+    attach: function(cord){
       this.attached = true
       this.cord = cord
       this.relPosition = this.position.clone()
