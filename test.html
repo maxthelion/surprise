@@ -102,6 +102,7 @@
     this.position = this.relPosition
     this.vector = new Vector(0, 0)
     this.basePosition = banner.position
+    this.phase = 1;
   }
   Cord.prototype = {
     width: 5,
@@ -110,10 +111,24 @@
       var tmpPosition = this.basePosition.clone()
       tmpPosition.add(this.relPosition)
       this.position = tmpPosition
+      if (this.phase == 2) {
+        this.segment1angle += 0.1;
+        this.segment2angle += 0.2;
+      }
     },
     avatar: document.getElementById('cannon'),
     draw: function(ctx){
-      ctx.fillRect(this.position.x, this.position.y, this.width, this.height)
+      if (this.phase == 1) {
+        ctx.fillRect(this.position.x, this.position.y, this.width, this.height)
+      } else if (this.phase == 2) {
+        ctx.beginPath();
+        ctx.moveTo(this.position.x, this.position.y)
+        var mid = this.position.clone().add(new Vector(0, this.segment1length).rotate(this.segment1angle));
+        ctx.lineTo(mid.x, mid.y);
+        var end = mid.clone().add(new Vector(0, this.segment2length).rotate(this.segment2angle));
+        ctx.lineTo(end.x, end.y);
+        ctx.stroke();
+      }
     },
     midpoint: function() {
       return this.position.clone().subtract(new Vector(this.width/2, this.height/2));
@@ -216,12 +231,23 @@
       ctx.drawImage(this.avatar, sliceIndex * width, 0, width, height, -(width/2), -(height/2), width, height)
       ctx.restore()
     },
-    attach: function(cord){
-      this.attached = true
-      this.cord = cord
-      this.relPosition = this.position.clone()
-      this.relPosition.subtract(cord.position)
-      this.relPosition.x = -7;
+    attach: function(cord) {
+      if (!this.attached) {
+        this.attached = true
+        this.cord = cord
+        this.cord.phase = 2;
+        this.relPosition = this.position.clone()
+        this.relPosition.subtract(cord.position)
+        this.relPosition.x = -7;
+        this.cord.segment1length = this.relPosition.y;
+        this.cord.segment1angle = 0;
+        this.cord.segment2length = this.cord.height - this.cord.segment1length;
+        this.cord.segment2angle = 0;
+
+        this.vector.y = 0;
+
+        // split into 2
+      }
     }
   }
   
@@ -273,7 +299,7 @@
       cords.forEach(function(cord){
         if (
           Math.abs(cord.position.x - monkey.position.x) < 40 &&
-          monkey.position.y < 200
+          monkey.position.y >= cord.position.y && monkey.position.y <= cord.position.y + cord.height
         ){
           monkey.attach(cord);
           banner.startFall()

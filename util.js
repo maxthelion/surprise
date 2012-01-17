@@ -42,6 +42,12 @@ Vector.prototype = {
     this.x = v.x;
     this.y = v.y;
     return this;
+  },
+
+  cancel: function(a) {
+    this.rotate(-a);
+    this.y = 0;
+    this.rotate(a);
   }
 }
 
