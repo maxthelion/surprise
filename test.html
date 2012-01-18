@@ -105,15 +105,15 @@
     this.phase = 1;
   }
   Cord.prototype = {
-    width: 5,
+    width: 2,
     height: 200,
     update: function(){
       var tmpPosition = this.basePosition.clone()
       tmpPosition.add(this.relPosition)
       this.position = tmpPosition
       if (this.phase == 2) {
-        this.segment1angle += 0.1;
-        this.segment2angle += 0.2;
+        this.segment1angle = Math.sin(frameNum / 4) / 2;
+        this.segment2angle = Math.sin(frameNum / 4) ;
       }
     },
     avatar: document.getElementById('cannon'),
@@ -122,12 +122,14 @@
         ctx.fillRect(this.position.x, this.position.y, this.width, this.height)
       } else if (this.phase == 2) {
         ctx.beginPath();
+        ctx.lineWidth = 2
         ctx.moveTo(this.position.x, this.position.y)
         var mid = this.position.clone().add(new Vector(0, this.segment1length).rotate(this.segment1angle));
         ctx.lineTo(mid.x, mid.y);
         var end = mid.clone().add(new Vector(0, this.segment2length).rotate(this.segment2angle));
         ctx.lineTo(end.x, end.y);
         ctx.stroke();
+        this.mid = mid
       }
     },
     midpoint: function() {
@@ -211,24 +213,28 @@
         this.position.add(this.vector)
         this.currentPosition = this.position
       } else {
-        this.angle = 0
-        var tmp = this.cord.position.clone();
-        tmp.add(this.relPosition)
+        this.angle = Math.sin(frameNum / 3) /2 
+        var tmp = this.cord.mid.clone();
+        // tmp.add(this.relPosition)
         this.position = tmp
       }
     },
     avatar: document.getElementById('monkey'),
     draw: function(ctx){
-      ctx.save()
-      ctx.translate(Math.floor(this.position.x), Math.floor(this.position.y));
-      ctx.rotate(this.angle);
       var width = 100
       var height = 100
-      if (this.attached)
+      ctx.save()
+      if (this.attached){
         var sliceIndex = 4
-      else
+        ctx.translate(Math.floor(this.position.x), Math.floor(this.position.y));
+        ctx.rotate(this.angle);
+        ctx.drawImage(this.avatar, sliceIndex * width, 0, width, height, -(width/2), 0, width, height)
+      } else {
         var sliceIndex = (frameNum % 4)
-      ctx.drawImage(this.avatar, sliceIndex * width, 0, width, height, -(width/2), -(height/2), width, height)
+        ctx.translate(Math.floor(this.position.x), Math.floor(this.position.y));
+        ctx.rotate(this.angle);
+        ctx.drawImage(this.avatar, sliceIndex * width, 0, width, height, -(width/2), -(height/2), width, height)
+      }
       ctx.restore()
     },
     attach: function(cord) {
